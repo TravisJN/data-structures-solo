@@ -4,16 +4,19 @@ var HashTable = function(){
 };
 
 HashTable.prototype.insert = function(k, v){
-  //debugger;
+  //run hashing function for index
   var i = getIndexBelowMaxForKey(k, this._limit);
-  if (this._storage[i]) {
+  //check if there is already an object at that index
+
+  if (!this._storage.get(i)) {  //if there's no object at the index
+    //create an array to store multiple values with the same index
     var bucket = [];
-    bucket.push(this._storage[i]);
-    bucket.push([k, v]);
-    this._storage[i] = bucket;
-  } else {
-    this._storage[i] = [k, v];
+    //set the bucket to be at the index
+    this._storage.set(i, bucket);
   }
+  var bucket = this._storage.get(i);
+  //push the passed key value pair into the bucket
+  bucket.push([k, v]);
 };
 
 HashTable.prototype.retrieve = function(k){
@@ -21,35 +24,37 @@ HashTable.prototype.retrieve = function(k){
       value = 1;
 
   var i = getIndexBelowMaxForKey(k, this._limit);
-  var itemAtIndex = this._storage[i];  //stores the value at the passed index for easy reference
+  var itemAtIndex = this._storage.get(i);  //stores the bucket at the passed index for easy reference
 
-  if (k === itemAtIndex[key]) {
-    console.log(itemAtIndex[value]);
-    return itemAtIndex[value];
-  } else if (this._storage[i]) {
-    for (var j = 0; j < itemAtIndex.length; j++) {
-      if (itemAtIndex[j] && itemAtIndex[j][key] === k) {
-        return itemAtIndex[j][value];
-      }
-    }
+  //loop through bucket (full of arrays with key-value pairs)
+  for (var j = 0; j < itemAtIndex.length; j++) {
+    //set temp variable that is the array of a key-value pair
+    var subArray = itemAtIndex[j];
+    //check the first index of the key-value array (the key is stored at index 0)
+    if (k === subArray[key]) {
+      return subArray[value];
+    } 
   }
   return null;
 };
 
 HashTable.prototype.remove = function(k){
-	var key = 0,
+  var key = 0,
       value = 1;
 
   var i = getIndexBelowMaxForKey(k, this._limit);
-	if (this._storage[i][key] === k) {
-    this._storage[i][key] = null;
-  } else if (this._storage[i]) {
-    for (var j = 0; j < this._storage[i].length; j++) {
-      if (this._storage[i][j][key] === k) {
-        this._storage[i][j][key] = null;
-      }
-    }
-  }
+
+  var itemAtIndex = this._storage.get(i);  //stores the bucket at the passed index for easy reference
+
+  //loop through bucket (full of arrays with key-value pairs)
+  for (var j = 0; j < itemAtIndex.length; j++) {
+    //set temp variable that is the array of a key-value pair
+    var subArray = itemAtIndex[j];
+    //check the first index of the key-value array (the key is stored at index 0)
+    if (k === subArray[key]) {
+      itemAtIndex.splice(j, 1);
+    } 
+  }  
 };
 
 
